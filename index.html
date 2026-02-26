@@ -25,6 +25,10 @@
   <textarea id="jobDescription" placeholder="Paste job description here..."></textarea>
   <br>
   <button id="generate" type="button">Generate questions</button>
+  <div id="retrieved-experience" style="margin: 20px 0; padding: 15px; background: #f0f9ff; border-left: 4px solid #0ea5e9; display: none;">
+    <h3 style="margin-top: 0; color: #0369a1;">📚 Retrieved Relevant Experience</h3>
+    <div id="experience-list"></div>
+</div>
   <div id="questions"></div>
   <div id="error" class="error"></div>
 
@@ -55,6 +59,22 @@
           errorEl.textContent = data.error || 'Request failed.';
           return;
         }
+        // Show retrieved relevant experience
+        const expDiv = document.getElementById('retrieved-experience');
+        const expList = document.getElementById('experience-list');
+        if (data.relevantExperiences && data.relevantExperiences.length) {
+          expList.innerHTML = data.relevantExperiences.map((exp, i) =>
+            `<div style="margin: 10px 0;">
+              <strong>${i + 1}. ${escapeHtml(exp.role)} at ${escapeHtml(exp.company)}</strong>
+              <span style="color: #0369a1; margin-left: 10px;">${(exp.score * 100).toFixed(1)}% match</span>
+            </div>`
+          ).join('');
+          expDiv.style.display = 'block';
+        } else {
+          expDiv.style.display = 'none';
+          expList.innerHTML = '';
+        }
+        // Display questions
         if (data.questions && data.questions.length) {
           questionsEl.innerHTML = '<strong>Questions:</strong><ol>' +
             data.questions.map(q => '<li>' + escapeHtml(q) + '</li>').join('') + '</ol>';

@@ -1,0 +1,124 @@
+{
+    "experiences": [
+      {
+        "id": "walmart_ai_item_management",
+        "role": "Staff Product Manager, Seller Experience & AI",
+        "company": "Walmart",
+        "duration": "Apr 2022 – July 2025",
+        "category": "AI_Product_Leadership",
+        "skills": ["GenAI", "GPT-4", "RAG", "Product Strategy", "LLMs", "Automation"],
+        "description": "Led AI product roadmap for GenAI-powered Item Management platform using GPT-4 to automate product listing updates, reducing update time by 60% and increasing sell-through rates by 1.6x.",
+        "achievements": [
+          "Built GenAI-powered Item Management platform with GPT-4, reducing product listing update time by 60% (from 5 days to 2 days) for 100K+ SKUs monthly",
+          "Defined 0→1 product vision for first-party seller experience tooling, increasing marketplace brand adoption by 67% through enhanced brand protection"
+        ]
+      },
+      {
+        "id": "walmart_ip_infringement",
+        "role": "Staff Product Manager, Seller Experience & AI",
+        "company": "Walmart",
+        "duration": "Apr 2022 – July 2025",
+        "category": "Multimodal_AI",
+        "skills": ["GPT-4 Vision", "Multimodal AI", "Computer Vision", "RAG", "LLMs", "Brand Protection"],
+        "description": "Automated IP infringement detection with multimodal LLMs (GPT-4 Vision, Gemini Flash), delivering $14M in brand protection savings with minimal human intervention.",
+        "achievements": [
+          "Built multimodal AI system combining GPT-4 Vision and RAG architecture to detect IP infringement in product listings, achieving 95% precision and 92% recall",
+          "Designed confidence scoring system routing 80% of decisions to auto-approve/reject, 20% to human review for optimal efficiency",
+          "Delivered $14M in brand protection savings through automated trademark and copyright violation detection"
+        ]
+      },
+      {
+        "id": "walmart_ml_tagging",
+        "role": "Staff Product Manager, Seller Experience & AI",
+        "company": "Walmart",
+        "duration": "Apr 2022 – July 2025",
+        "category": "ML_Systems",
+        "skills": ["Machine Learning", "Classification", "Loss Prevention", "Inventory Management"],
+        "description": "Built ML-driven tagging and loss-prevention workflows, reducing nil picks by 25%, preventing lost sales, and improving inventory turnover in high-volume categories.",
+        "achievements": [
+          "Implemented ML-driven product tagging system improving inventory classification accuracy by 25%",
+          "Reduced nil picks (out of stock items) by 25% through predictive tagging, preventing lost sales"
+        ]
+      },
+      {
+        "id": "walmart_attribute_locking",
+        "role": "Sr. Product Manager, Merchant Technology & AI",
+        "company": "Walmart",
+        "duration": "Apr 2021 – Apr 2022",
+        "category": "ML_Compliance",
+        "skills": ["Machine Learning", "Data Validation", "Compliance", "Product Management"],
+        "description": "Led Attribute Locking project applying ML-driven validation to enforce compliance on 200K+ items quarterly, reducing attribute-related errors by 25%.",
+        "achievements": [
+          "Applied ML-driven validation to enforce compliance on 200K+ items quarterly, reducing attribute errors by 25%",
+          "Streamlined multi-touch merchant platform into unified experience, improving catalog completeness by 22% and reducing onboarding time by 35%"
+        ]
+      },
+      {
+        "id": "walmart_ab_testing",
+        "role": "Sr. Product Manager, Merchant Technology & AI",
+        "company": "Walmart",
+        "duration": "Apr 2021 – Apr 2022",
+        "category": "Experimentation",
+        "skills": ["A/B Testing", "Analytics", "Quantum Metrics", "Tableau", "Data Analysis"],
+        "description": "Applied A/B testing, Quantum Metrics, and Tableau to uncover engagement trends, validate compliance workflow redesigns, and prioritize high-impact product enhancements.",
+        "achievements": [
+          "Drove engagement-focused redesign of compliance workflows, reducing friction and cutting approval time by 30%",
+          "Used A/B testing and analytics to validate workflow changes, accelerating speed-to-shelf for high-performing SKUs by 25%"
+        ]
+      },
+      {
+        "id": "walmart_engineering",
+        "role": "Sr. Software Engineer, Customer Experience",
+        "company": "Walmart",
+        "duration": "Dec 2017 – Apr 2021",
+        "category": "Technical_Leadership",
+        "skills": ["ReactJS", "NodeJS", "Redux", "Software Engineering", "Team Leadership"],
+        "description": "Led 4-person development team to build merchant item setup and management tools with config-driven rules engine, cutting new user onboarding from 4 weeks to under 3 days.",
+        "achievements": [
+          "Built merchant item setup and management tools (ReactJS, NodeJS, Redux) with config-driven rules engine",
+          "Reduced new user onboarding from 4 weeks to under 3 days through improved UX and automation",
+          "Streamlined approval workflows used by 300+ senior merchants, reducing error rates by 32%"
+        ]
+      },
+      {
+        "id": "pinwheelers",
+        "role": "Co-Founder",
+        "company": "The Pinwheelers (E-commerce Startup)",
+        "duration": "Sep 2017 – Dec 2023",
+        "category": "Entrepreneurship",
+        "skills": ["E-commerce", "Product Management", "Operations", "Growth", "AI Marketing"],
+        "description": "Founded and scaled profitable e-commerce brand, launching 4 stainless steel lunch box products across Amazon and DTC channels, selling 10K+ units to customers in 12+ countries.",
+        "achievements": [
+          "Owned end-to-end product lifecycle from sourcing to go-to-market, driving 20%+ YoY growth",
+          "Maintained 4.8/5 average customer rating with 200+ reviews through quality focus",
+          "Leveraged AI-powered ad and content tools to run targeted Amazon and Meta campaigns, optimizing funnels to sustain growth"
+        ]
+      },
+      {
+        "id": "banking_mufg",
+        "role": "Sr. Software Engineer, Data Platform & Architecture",
+        "company": "Bank of Tokyo-Mitsubishi UFJ",
+        "duration": "Mar 2014 – Aug 2016",
+        "category": "Enterprise_Engineering",
+        "skills": ["Data Architecture", "Automation", "Enterprise Software", "Quality Assurance"],
+        "description": "Standardized enterprise workflows for U.S. Core Banking System, using automation and data-driven tools to boost quality, security, and delivery speed for 250+ developers.",
+        "achievements": [
+          "Standardized enterprise workflows improving quality, security, and delivery speed for 250+ developers",
+          "Built automation and data-driven tools for core banking system"
+        ]
+      },
+      {
+        "id": "banking_bofa",
+        "role": "Software Engineer, Operational Automation",
+        "company": "Bank of America Merrill Lynch",
+        "duration": "Jul 2012 – Mar 2014",
+        "category": "Trading_Systems",
+        "skills": ["Trading Systems", "JavaScript", "Ext JS", "Performance Optimization", "UX"],
+        "description": "Re-engineered real-time trade capture systems with enhanced UX and performance (Ext JS, JavaScript), improving trading desk efficiency by 20% and reducing operational bottlenecks.",
+        "achievements": [
+          "Improved trading desk efficiency by 20% through UX and performance enhancements",
+          "Reduced operational bottlenecks in real-time trade capture systems"
+        ]
+      }
+    ]
+  }

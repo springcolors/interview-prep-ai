@@ -1,9 +1,11 @@
+const { retrieveRelevantExperience, formatExperienceForPrompt } = require('./retrieval');
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const { Anthropic } = require('@anthropic-ai/sdk');
 
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -29,66 +31,71 @@ app.get('/api/health', (req, res) => {
 
 // Generate interview questions using Anthropic Claude API (SDK)
 app.post('/api/generate-questions', async (req, res) => {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    return res.status(500).json({
-      error: 'ANTHROPIC_API_KEY is not set in .env'
-    });
-  }
-
-  // Accept either JSON { jobDescription: "..." } or plain-text body
-  const jobDescription =
-    (req.body && req.body.jobDescription) ||
-    (typeof req.body === 'string' ? req.body : null);
-  const trimmed = typeof jobDescription === 'string' ? jobDescription.trim() : '';
-  if (!trimmed) {
-    return res.status(400).json({
-      error: 'Request body must include a non-empty job description. Send JSON: { "jobDescription": "..." } or plain text.'
-    });
-  }
-
-  const prompt = `You are an expert interview coach for product management roles. Based on the following job description, generate exactly 5 behavioral interview questions.
-
-Requirements:
-1. All 5 questions must be behavioral (past experience, how you handled situations, STAR-style).
-2. Tie each question to specific skills, responsibilities, or requirements mentioned in the job description—reference the JD explicitly where relevant.
-3. Focus on product management scenarios (e.g. prioritization, stakeholder alignment, tradeoffs, discovery, roadmap, metrics, cross-functional work).
-4. Format your response as a numbered list (1. ... 2. ... etc.). One question per line, no other text.
-
-Job description:
-${trimmed}`;
-
   try {
-    const client = new Anthropic({ apiKey });
-    const message = await client.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1024,
-      messages: [{ role: 'user', content: prompt }]
-    });
+      const { jobDescription } = req.body;
+      
+      if (!jobDescription) {
+          return res.status(400).json({ error: 'Job description is required' });
+      }
+      
+      console.log('📝 Generating questions for JD...');
+      
+      // NEW: Retrieve relevant experience
+      const relevantExperiences = await retrieveRelevantExperience(jobDescription, 3);
+      const experienceContext = formatExperienceForPrompt(relevantExperiences);
+      
+      console.log('✅ Retrieved relevant experience');
+      console.log(experienceContext);
+      
+      // Enhanced prompt with RAG context
+      const prompt = `You are helping me prepare for a Product Manager interview.
 
-    const block = message.content?.find((b) => b.type === 'text');
-    const text = block?.text ?? '';
-    const questions = text
-      .split('\n')
-      .map((q) => q.replace(/^\d+[\.\)]\s*/, '').trim())
-      .filter((q) => q.length > 0)
-      .slice(0, 5);
+JOB DESCRIPTION:
+${jobDescription}
 
-    res.json({ questions });
-  } catch (err) {
-    console.error('Anthropic API error:', err.message || err);
-    const status = err.status ?? 502;
-    const rawMessage =
-      err.message ||
-      (err.error && (typeof err.error === 'string' ? err.error : err.error?.message));
-    const message =
-      rawMessage && String(rawMessage).trim()
-        ? String(rawMessage).trim()
-        : `Request failed (${status}). Check ANTHROPIC_API_KEY in .env and try again.`;
-    res.status(status >= 400 ? status : 502).json({
-      error: message,
-      status
-    });
+${experienceContext}
+
+Generate 5 behavioral interview questions that:
+1. Are specific to the requirements in the job description
+2. Reference my actual achievements and experience listed above where relevant
+3. Use STAR format (Situation, Task, Action, Result)
+4. Help me showcase the most relevant accomplishments for this role
+5. Are not generic ("Tell me about yourself" type questions)
+
+IMPORTANT: Make the questions SPECIFIC to both the job requirements AND my background.
+For example, if the job requires AI experience and I built an AI system, ask about that specific system.
+
+Format as a numbered list (1-5).`;
+
+      // Call Claude
+      const response = await anthropic.messages.create({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1500,
+          messages: [{
+              role: 'user',
+              content: prompt
+          }]
+      });
+      
+      const text = response.content[0].text;
+      const questions = text
+        .split('\n')
+        .map((q) => q.replace(/^\d+[\.\)]\s*/, '').trim())
+        .filter((q) => q.length > 0)
+        .slice(0, 5);
+
+      res.json({ 
+          questions,
+          relevantExperiences: relevantExperiences.map(exp => ({
+              role: exp.role,
+              company: exp.company,
+              score: exp.score
+          }))
+      });
+      
+  } catch (error) {
+      console.error('Error generating questions:', error);
+      res.status(500).json({ error: 'Failed to generate questions' });
   }
 });
 
