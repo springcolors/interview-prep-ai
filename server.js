@@ -60,7 +60,7 @@ app.post('/api/generate-questions', async (req, res) => {
       }
       const experienceContext = formatExperienceForPrompt(relevantExperiences);
       
-      // Enhanced prompt with RAG context
+      // Enhanced prompt: sectioned questions by category (like recruiter screen, technical, cross-functional, etc.)
       const prompt = `You are helping me prepare for a Product Manager interview.
 
 JOB DESCRIPTION:
@@ -69,19 +69,38 @@ ${jobDescription}
 ${experienceContext}
 
 Your task:
-1. First, extract from the job description above. Output exactly these two lines at the start of your response (nothing else before them):
+1. First, extract from the job description. Output exactly these two lines at the start (nothing else before them):
    JOB_TITLE: <the job title or role name>
    COMPANY: <the company or organization name>
    Then a blank line.
-2. Then output exactly 5 behavioral interview questions. Each question must ask about past experience (STAR: Situation, Task, Action, Result).
-   Exactly 5 lines. Each line starts with "1." or "2." or "3." or "4." or "5." followed by one question.
-   Each question should tie the job description to the candidate's experience above. Make them specific. Reference their real achievements where relevant.
-   No section titles, no headings, no extra text. Start the questions with "1." and end with "5."`;
+
+2. Then output interview questions grouped by section. Use markdown section headers and list format.
+
+   Use these sections (include only sections that fit the JD; you may omit or add one if the JD strongly emphasizes something else):
+   - Recruiter Screen
+   - Technical Expertise and Innovation
+   - Cross-Functional Collaboration
+   - Strategic Thinking and Problem Solving
+   - User-Centered Design and Customer Advocacy
+
+   For each section, output exactly:
+     ## Section Name
+     - First question here?
+     - Second question here?
+     (2–4 questions per section; use a blank line between sections)
+
+   Question mix per section:
+   - Include at least one behavioral question (past experience: "Describe a time...", "Tell me about a project where...") that references the candidate's actual experience above.
+   - Include situational/hypothetical questions tailored to the role and company: "Imagine you are [Role] at [Company]...", "As a [Role] at [Company], how would you...?"
+   - For "Recruiter Screen", start with one intro question like "Please tell me about yourself..." then 1–2 more.
+
+   Personalize: reference the candidate's companies, roles, and achievements from RELEVANT BACKGROUND above. Tailor hypotheticals to the job's company and product names from the JD.
+   Use the exact company name and role from the JD in situational questions.`;
 
       // Call Claude (current model IDs: claude-sonnet-4-6, claude-opus-4-6, claude-haiku-4-5)
       const response = await anthropic.messages.create({
           model: 'claude-sonnet-4-6',
-          max_tokens: 1500,
+          max_tokens: 2500,
           messages: [{
               role: 'user',
               content: prompt
@@ -110,16 +129,28 @@ Your task:
       }
       // Trim any leading blank lines from questions block
       questionsText = questionsText.replace(/^\s*\n+/, '');
-      // Split by numbered lines (1. 2. 3. etc.) so multi-line questions stay together
-      const rawBlocks = questionsText.split(/\n\s*\d+[\.\)]\s*/);
-      const isHeading = (s) => s.length < 60 || /interview questions for .* role$/i.test(s) || /^(regional|execution|behavioral)\s+(growth|strategy|questions?)/i.test(s);
-      let questions = rawBlocks
-        .map((q) => q.replace(/^\d+[\.\)]\s*/, '').trim().replace(/\n+/g, ' '))
-        .filter((q) => q.length > 15 && !isHeading(q))
-        .slice(0, 5);
-      if (questions.length === 0) {
-        questions = questionsText.split('\n').map((q) => q.replace(/^\d+[\.\)]\s*/, '').trim()).filter((q) => q.length > 15 && !isHeading(q)).slice(0, 5);
+
+      // Parse sectioned format: ## Section Name\n- Q1\n- Q2\n\n## Next Section...
+      let sections = [];
+      const sectionBlocks = questionsText.split(/\n\s*##\s+/);
+      for (const block of sectionBlocks) {
+        const trimmed = block.trim();
+        if (!trimmed) continue;
+        const firstNewline = trimmed.indexOf('\n');
+        const title = firstNewline === -1 ? trimmed : trimmed.slice(0, firstNewline).trim();
+        const body = firstNewline === -1 ? '' : trimmed.slice(firstNewline + 1).trim();
+        const questionLines = body.split(/\n/).map((line) => line.replace(/^\s*[-*]\s*/, '').replace(/^\s*\d+[\.\)]\s*/, '').trim()).filter((q) => q.length > 5);
+        if (title && questionLines.length) sections.push({ title, questions: questionLines });
       }
+
+      // Fallback: if no ## sections, treat whole block as one section or parse numbered list
+      if (sections.length === 0) {
+        const flat = questionsText.split(/\n/).map((line) => line.replace(/^\s*[-*]\s*/, '').replace(/^\s*\d+[\.\)]\s*/, '').trim()).filter((q) => q.length > 15);
+        if (flat.length) sections = [{ title: 'Interview Questions', questions: flat }];
+      }
+
+      // Flat list of all questions (for backward compat and copy)
+      const questions = sections.flatMap((s) => s.questions);
 
       // Raw average of experience scores (Pinecone similarity, typically 0.4-0.55)
       const rawAvg = relevantExperiences.length
@@ -133,6 +164,7 @@ Your task:
 
       res.json({ 
           questions,
+          sections: sections.length ? sections : null,
           jobTitle: jobTitle || null,
           company: company || null,
           overallMatch,

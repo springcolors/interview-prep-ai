@@ -1,7 +1,7 @@
 {
   "name": "interview-prep-ai",
   "version": "1.0.0",
-  "description": "",
+  "description": "RAG-powered AI interview preparation tool",
   "main": "index.js",
   "scripts": {
     "start": "node server.js",

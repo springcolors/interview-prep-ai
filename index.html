@@ -278,6 +278,25 @@
             margin-bottom: 16px;
         }
 
+        .question-section {
+            margin-bottom: 28px;
+        }
+        .question-section .section-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #1e40af;
+            margin: 0 0 12px 0;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .question-section .section-questions {
+            padding-left: 24px;
+            margin: 0;
+        }
+        .question-section .section-questions li {
+            margin-bottom: 12px;
+        }
+
         .questions-list h3, .questions-list h4 {
             font-size: 1rem;
             font-weight: 600;
@@ -312,6 +331,55 @@
             color: white;
             text-decoration: underline;
         }
+
+        .error-banner {
+            display: none;
+            margin-top: 16px;
+            padding: 14px 18px;
+            border-radius: 8px;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        .error-banner.visible {
+            display: flex;
+        }
+        .error-banner.info {
+            background: #eff6ff;
+            border: 1px solid #93c5fd;
+            color: #1e40af;
+        }
+        .error-banner.error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+        .error-banner .error-icon {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+        .error-banner .error-content {
+            min-width: 0;
+            flex-grow: 1;
+        }
+        .error-banner .error-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .error-banner .error-dismiss {
+            background: none;
+            border: none;
+            color: inherit;
+            opacity: 0.7;
+            cursor: pointer;
+            padding: 0 4px;
+            font-size: 1.1rem;
+            line-height: 1;
+        }
+        .error-banner .error-dismiss:hover {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -328,7 +396,8 @@
             </label>
             <textarea 
                 id="job-description" 
-                rows="8" 
+                rows="8"
+                oninput="clearError()"
                 placeholder="Paste the job description here...
 
 Example:
@@ -346,6 +415,14 @@ Staff Product Manager, AI Products
                 <button class="btn-secondary" onclick="clearForm()">
                     🔄 Clear
                 </button>
+            </div>
+            <div id="error-banner" class="error-banner" role="alert" aria-live="polite">
+                <span class="error-icon" id="error-icon"></span>
+                <div class="error-content">
+                    <div class="error-title" id="error-title"></div>
+                    <div id="error-detail"></div>
+                </div>
+                <button type="button" class="error-dismiss" onclick="clearError()" aria-label="Dismiss">×</button>
             </div>
         </div>
 
@@ -395,11 +472,34 @@ Staff Product Manager, AI Products
     </footer>
 
     <script>
+        function showError(title, detail, kind) {
+            kind = kind || 'error';
+            const banner = document.getElementById('error-banner');
+            const icon = document.getElementById('error-icon');
+            document.getElementById('error-title').textContent = title;
+            document.getElementById('error-detail').textContent = detail || '';
+            document.getElementById('error-detail').style.display = detail ? 'block' : 'none';
+            banner.className = 'error-banner visible ' + kind;
+            icon.textContent = kind === 'info' ? '💡' : '⚠️';
+            banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function clearError() {
+            const banner = document.getElementById('error-banner');
+            banner.classList.remove('visible');
+        }
+
         async function generateQuestions() {
             const jobDescription = document.getElementById('job-description').value.trim();
-            
+            clearError();
+
             if (!jobDescription) {
-                alert('Please paste a job description first!');
+                showError(
+                    'Job description needed',
+                    'Paste or type the job description in the box above, then click Generate Personalized Questions.',
+                    'info'
+                );
+                document.getElementById('job-description').focus();
                 return;
             }
 
@@ -419,10 +519,31 @@ Staff Product Manager, AI Products
                     body: JSON.stringify({ jobDescription })
                 });
 
-                const data = await response.json();
+                let data;
+                try {
+                    data = await response.json();
+                } catch (_) {
+                    document.getElementById('loading').classList.remove('active');
+                    showError(
+                        'Invalid response from server',
+                        'The server returned something we couldn’t read. Try again or check that the app is running correctly.',
+                        'error'
+                    );
+                    return;
+                }
 
                 // Hide loading
                 document.getElementById('loading').classList.remove('active');
+
+                if (!response.ok) {
+                    const msg = (data && data.error) ? String(data.error) : 'Something went wrong. Please try again.';
+                    showError(
+                        'Couldn’t generate questions',
+                        msg,
+                        'error'
+                    );
+                    return;
+                }
 
                 // Show role & company from job description
                 const jobRoleCard = document.getElementById('job-role-card');
@@ -461,14 +582,23 @@ Staff Product Manager, AI Products
                     document.getElementById('overall-match').style.display = 'none';
                 }
 
-                // Show questions
+                // Show questions (sectioned or flat)
                 const questionsList = document.getElementById('questions-list');
-                questionsList.innerHTML = formatQuestions(data.questions);
+                questionsList.innerHTML = data.sections && data.sections.length
+                    ? formatSections(data.sections)
+                    : formatQuestions(data.questions);
                 document.getElementById('questions-container').classList.add('active');
 
             } catch (error) {
                 document.getElementById('loading').classList.remove('active');
-                alert('Error generating questions. Please try again.');
+                const isNetwork = error.message === 'Failed to fetch' || error.name === 'TypeError';
+                showError(
+                    isNetwork ? 'Connection problem' : 'Something went wrong',
+                    isNetwork
+                        ? 'Check your internet connection and that the server is running, then try again.'
+                        : 'We couldn’t complete your request. Please try again. If it keeps happening, check the browser console for details.',
+                    'error'
+                );
                 console.error('Error:', error);
             }
         }
@@ -514,6 +644,17 @@ Staff Product Manager, AI Products
             return simpleMarkdown(str);
         }
 
+        function formatSections(sections) {
+            if (!sections || !sections.length) return '<p>No questions returned.</p>';
+            return sections.map(sec =>
+                '<section class="question-section">' +
+                '<h3 class="section-title">' + escapeHtml(sec.title) + '</h3>' +
+                '<ol class="section-questions">' +
+                (sec.questions || []).map(q => '<li>' + simpleMarkdown(q) + '</li>').join('') +
+                '</ol></section>'
+            ).join('');
+        }
+
         function copyQuestions() {
             const questions = document.getElementById('questions-list').innerText;
             navigator.clipboard.writeText(questions).then(() => {
@@ -529,6 +670,7 @@ Staff Product Manager, AI Products
         }
 
         function clearForm() {
+            clearError();
             document.getElementById('job-description').value = '';
             document.getElementById('empty-state').style.display = 'block';
             document.getElementById('job-role-card').classList.remove('active');
