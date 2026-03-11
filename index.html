@@ -155,6 +155,26 @@
             font-size: 0.95rem;
         }
 
+        .job-role-card {
+            display: none;
+            margin-bottom: 24px;
+        }
+        .job-role-card.active {
+            display: block;
+        }
+        .job-role-header {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+        .job-role-content {
+            color: #374151;
+            font-size: 0.95rem;
+        }
+        .job-role-content .role-title { font-weight: 600; color: #0369a1; }
+        .job-role-content .role-company { margin-top: 4px; }
+
         .retrieved-experience {
             display: none;
             margin-bottom: 24px;
@@ -337,6 +357,11 @@ Staff Product Manager, AI Products
             </div>
         </div>
 
+        <div class="card job-role-card" id="job-role-card">
+            <div class="job-role-header">📋 Role from job description</div>
+            <div id="job-role-content" class="job-role-content"></div>
+        </div>
+
         <div class="card retrieved-experience" id="retrieved-experience">
             <div class="exp-header">
                 📚 Retrieved Relevant Experience
@@ -381,6 +406,7 @@ Staff Product Manager, AI Products
             // Show loading, hide everything else
             document.getElementById('loading').classList.add('active');
             document.getElementById('empty-state').style.display = 'none';
+            document.getElementById('job-role-card').classList.remove('active');
             document.getElementById('retrieved-experience').classList.remove('active');
             document.getElementById('questions-container').classList.remove('active');
 
@@ -397,6 +423,18 @@ Staff Product Manager, AI Products
 
                 // Hide loading
                 document.getElementById('loading').classList.remove('active');
+
+                // Show role & company from job description
+                const jobRoleCard = document.getElementById('job-role-card');
+                const jobRoleContent = document.getElementById('job-role-content');
+                if (jobRoleCard && jobRoleContent && (data.jobTitle || data.company)) {
+                    jobRoleContent.innerHTML = '';
+                    if (data.jobTitle) jobRoleContent.innerHTML += `<div class="role-title">${escapeHtml(data.jobTitle)}</div>`;
+                    if (data.company) jobRoleContent.innerHTML += `<div class="role-company">${escapeHtml(data.company)}</div>`;
+                    jobRoleCard.classList.add('active');
+                } else if (jobRoleCard) {
+                    jobRoleCard.classList.remove('active');
+                }
 
                 // Show retrieved experiences
                 if (data.relevantExperiences && data.relevantExperiences.length > 0) {
@@ -493,6 +531,8 @@ Staff Product Manager, AI Products
         function clearForm() {
             document.getElementById('job-description').value = '';
             document.getElementById('empty-state').style.display = 'block';
+            document.getElementById('job-role-card').classList.remove('active');
+            document.getElementById('job-role-content').innerHTML = '';
             document.getElementById('retrieved-experience').classList.remove('active');
             document.getElementById('overall-match').textContent = '';
             document.getElementById('questions-container').classList.remove('active');

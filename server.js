@@ -68,14 +68,15 @@ ${jobDescription}
 
 ${experienceContext}
 
-Your task: Output exactly 5 behavioral interview questions. Each question must ask about past experience (STAR: Situation, Task, Action, Result).
-
-Rules:
-- Output ONLY a numbered list. No section titles, no headings, no "Behavioral Interview Questions for..." line, no category names.
-- Exactly 5 lines. Each line starts with "1." or "2." or "3." or "4." or "5." followed by one question.
-- Each question should be one behavioral question (e.g. "Tell me about a time when...", "Walk me through...", "Describe a situation where...") that ties the job description to the candidate's experience above.
-- Make questions specific to both the job requirements and the candidate's background. Reference their real achievements where relevant.
-- Do not output generic intros or blank lines. Start directly with "1." and end with "5."`;
+Your task:
+1. First, extract from the job description above. Output exactly these two lines at the start of your response (nothing else before them):
+   JOB_TITLE: <the job title or role name>
+   COMPANY: <the company or organization name>
+   Then a blank line.
+2. Then output exactly 5 behavioral interview questions. Each question must ask about past experience (STAR: Situation, Task, Action, Result).
+   Exactly 5 lines. Each line starts with "1." or "2." or "3." or "4." or "5." followed by one question.
+   Each question should tie the job description to the candidate's experience above. Make them specific. Reference their real achievements where relevant.
+   No section titles, no headings, no extra text. Start the questions with "1." and end with "5."`;
 
       // Call Claude (current model IDs: claude-sonnet-4-6, claude-opus-4-6, claude-haiku-4-5)
       const response = await anthropic.messages.create({
@@ -93,23 +94,47 @@ Rules:
         console.error('Unexpected API response:', { content: response.content });
         return res.status(502).json({ error: 'Invalid response from AI. Please try again.' });
       }
+      // Parse extracted job title and company from first lines
+      let jobTitle = '';
+      let company = '';
+      let questionsText = text;
+      const titleMatch = text.match(/JOB_TITLE:\s*(.+?)(?:\n|$)/i);
+      const companyMatch = text.match(/COMPANY:\s*(.+?)(?:\n|$)/i);
+      if (titleMatch) {
+        jobTitle = titleMatch[1].trim();
+        questionsText = text.replace(/JOB_TITLE:\s*.+?(?:\n|$)/i, '').trim();
+      }
+      if (companyMatch) {
+        company = companyMatch[1].trim();
+        questionsText = questionsText.replace(/COMPANY:\s*.+?(?:\n|$)/i, '').trim();
+      }
+      // Trim any leading blank lines from questions block
+      questionsText = questionsText.replace(/^\s*\n+/, '');
       // Split by numbered lines (1. 2. 3. etc.) so multi-line questions stay together
-      const rawBlocks = text.split(/\n\s*\d+[\.\)]\s*/);
+      const rawBlocks = questionsText.split(/\n\s*\d+[\.\)]\s*/);
       const isHeading = (s) => s.length < 60 || /interview questions for .* role$/i.test(s) || /^(regional|execution|behavioral)\s+(growth|strategy|questions?)/i.test(s);
       let questions = rawBlocks
         .map((q) => q.replace(/^\d+[\.\)]\s*/, '').trim().replace(/\n+/g, ' '))
         .filter((q) => q.length > 15 && !isHeading(q))
         .slice(0, 5);
       if (questions.length === 0) {
-        questions = text.split('\n').map((q) => q.replace(/^\d+[\.\)]\s*/, '').trim()).filter((q) => q.length > 15 && !isHeading(q)).slice(0, 5);
+        questions = questionsText.split('\n').map((q) => q.replace(/^\d+[\.\)]\s*/, '').trim()).filter((q) => q.length > 15 && !isHeading(q)).slice(0, 5);
       }
 
-      const overallMatch = relevantExperiences.length
+      // Raw average of experience scores (Pinecone similarity, typically 0.4-0.55)
+      const rawAvg = relevantExperiences.length
         ? relevantExperiences.reduce((sum, exp) => sum + exp.score, 0) / relevantExperiences.length
+        : 0;
+      const rawMax = relevantExperiences.length ? Math.max(...relevantExperiences.map(e => e.score)) : 0;
+      // Scale to holistic "profile match" range (align with how other tools report ~70-80% for good fits)
+      const overallMatch = relevantExperiences.length
+        ? Math.min(0.95, 0.15 + (0.5 * rawMax + 0.5 * rawAvg) * 1.25)
         : 0;
 
       res.json({ 
           questions,
+          jobTitle: jobTitle || null,
+          company: company || null,
           overallMatch,
           relevantExperiences: relevantExperiences.map(exp => ({
               role: exp.role,
