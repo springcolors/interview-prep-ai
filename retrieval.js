@@ -28,26 +28,67 @@ async function retrieveRelevantExperience(jobDescription, topK = 3) {
         const raw = embeddingResponse.data[0].embedding;
         const queryEmbedding = Array.isArray(raw) ? raw : Array.from(raw);
         
-        // Query Pinecone
+        // Query more chunks so we can aggregate by experience (topK * 3 to allow grouping)
         const queryResponse = await index.query({
             vector: queryEmbedding,
-            topK: topK,
+            topK: Math.min(20, topK * 5),
             includeMetadata: true
         });
         
-        // Format results
-        const results = queryResponse.matches.map(match => ({
-            score: match.score,
-            role: match.metadata.role,
-            company: match.metadata.company,
-            duration: match.metadata.duration,
-            category: match.metadata.category,
-            skills: match.metadata.skills,
-            achievement: match.metadata.achievement,
-            fullText: match.metadata.fullText
-        }));
+        const chunks = (queryResponse.matches || []).map(match => ({
+            score: match.score ?? 0,
+            role: match.metadata?.role,
+            company: match.metadata?.company,
+            duration: match.metadata?.duration,
+            category: match.metadata?.category,
+            skills: match.metadata?.skills,
+            achievement: match.metadata?.achievement,
+            fullText: match.metadata?.fullText,
+            experienceId: match.metadata?.experienceId
+        })).filter(c => c.role && c.company);
         
-        console.log(`✅ Found ${results.length} relevant experiences`);
+        // Group by experience (role + company) and aggregate score
+        const byExperience = new Map();
+        for (const chunk of chunks) {
+            const key = `${chunk.role}\t${chunk.company}`;
+            if (!byExperience.has(key)) {
+                byExperience.set(key, {
+                    role: chunk.role,
+                    company: chunk.company,
+                    duration: chunk.duration,
+                    category: chunk.category,
+                    skills: chunk.skills,
+                    scores: [],
+                    achievements: [],
+                    bestAchievement: null,
+                    bestScore: 0
+                });
+            }
+            const agg = byExperience.get(key);
+            agg.scores.push(chunk.score);
+            if (chunk.achievement) agg.achievements.push(chunk.achievement);
+            if (chunk.score > agg.bestScore) {
+                agg.bestScore = chunk.score;
+                agg.bestAchievement = chunk.achievement;
+            }
+        }
+        
+        // Build one result per experience with aggregated score (average of matching chunks)
+        const results = Array.from(byExperience.values())
+            .map(agg => ({
+                role: agg.role,
+                company: agg.company,
+                duration: agg.duration,
+                category: agg.category,
+                skills: agg.skills,
+                score: agg.scores.length ? agg.scores.reduce((a, b) => a + b, 0) / agg.scores.length : 0,
+                achievement: agg.bestAchievement || (agg.achievements && agg.achievements[0]) || '',
+                fullText: agg.achievements?.join(' ') || ''
+            }))
+            .sort((a, b) => b.score - a.score)
+            .slice(0, topK);
+        
+        console.log(`✅ Found ${results.length} unique experiences (from ${chunks.length} chunks)`);
         return results;
         
     } catch (error) {

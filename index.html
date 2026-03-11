@@ -1,98 +1,503 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interview Prep AI</title>
-  <style>
-    * { box-sizing: border-box; }
-    body { font-family: system-ui, sans-serif; max-width: 640px; margin: 2rem auto; padding: 0 1rem; }
-    h1 { margin-bottom: 0.5rem; }
-    p { color: #555; margin-bottom: 1rem; }
-    textarea { width: 100%; min-height: 120px; padding: 0.75rem; font-size: 1rem; border: 1px solid #ccc; border-radius: 6px; resize: vertical; }
-    button { margin-top: 0.5rem; padding: 0.6rem 1.2rem; font-size: 1rem; background: #333; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
-    button:hover { background: #555; }
-    button:disabled { opacity: 0.6; cursor: not-allowed; }
-    #questions { margin-top: 1.5rem; }
-    #questions ol { padding-left: 1.25rem; }
-    #questions li { margin-bottom: 0.5rem; }
-    .error { color: #c00; margin-top: 1rem; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Interview Coach - RAG-Powered Question Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #825aaa 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding-top: 40px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-top: 10px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1f2937;
+            font-size: 0.95rem;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+
+        .retrieved-experience {
+            display: none;
+            margin-bottom: 24px;
+        }
+
+        .retrieved-experience.active {
+            display: block;
+        }
+
+        .exp-header {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .overall-match {
+            margin-left: auto;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #0ea5e9;
+            background: rgba(14, 165, 233, 0.12);
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        .exp-item {
+            background: #f0f9ff;
+            border-left: 4px solid #0ea5e9;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+        }
+
+        .exp-role {
+            font-weight: 600;
+            color: #0369a1;
+            font-size: 0.95rem;
+        }
+
+        .exp-score {
+            float: right;
+            background: #0ea5e9;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .questions-container {
+            display: none;
+        }
+
+        .questions-container.active {
+            display: block;
+        }
+
+        .questions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .questions-title {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 1.1rem;
+        }
+
+        .copy-btn {
+            background: #10b981;
+            color: white;
+            padding: 8px 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #059669;
+        }
+
+        .questions-list {
+            line-height: 1.8;
+            color: #374151;
+        }
+
+        .questions-list ol {
+            padding-left: 24px;
+        }
+
+        .questions-list li {
+            margin-bottom: 16px;
+        }
+
+        .questions-list h3, .questions-list h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 12px 0 6px;
+            color: #111827;
+        }
+        .questions-list strong { font-weight: 600; color: #111827; }
+        .questions-list em { font-style: italic; }
+        .questions-list hr { border: none; border-top: 1px solid #e5e7eb; margin: 12px 0; }
+        .questions-list p { margin: 8px 0; }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            padding: 40px 20px;
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: white;
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-  <h1>Interview Prep AI</h1>
-  <p>Paste a job description below to generate 5 behavioral interview questions tailored for product management.</p>
-  <textarea id="jobDescription" placeholder="Paste job description here..."></textarea>
-  <br>
-  <button id="generate" type="button">Generate questions</button>
-  <div id="retrieved-experience" style="margin: 20px 0; padding: 15px; background: #f0f9ff; border-left: 4px solid #0ea5e9; display: none;">
-    <h3 style="margin-top: 0; color: #0369a1;">📚 Retrieved Relevant Experience</h3>
-    <div id="experience-list"></div>
-</div>
-  <div id="questions"></div>
-  <div id="error" class="error"></div>
+    <div class="container">
+        <header>
+            <h1>🎯 AI Interview Coach</h1>
+            <p class="subtitle">RAG-Powered Personalized Interview Questions</p>
+            <span class="badge">Built with Claude + Pinecone + OpenAI</span>
+        </header>
 
-  <script>
-    const jobDescription = document.getElementById('jobDescription');
-    const generateBtn = document.getElementById('generate');
-    const questionsEl = document.getElementById('questions');
-    const errorEl = document.getElementById('error');
+        <div class="card">
+            <label for="job-description">
+                📋 Paste Job Description
+            </label>
+            <textarea 
+                id="job-description" 
+                rows="8" 
+                placeholder="Paste the job description here...
 
-    generateBtn.addEventListener('click', async () => {
-      const trimmed = jobDescription.value.trim();
-      if (!trimmed) {
-        errorEl.textContent = 'Please enter a job description.';
-        questionsEl.innerHTML = '';
-        return;
-      }
-      errorEl.textContent = '';
-      questionsEl.innerHTML = '';
-      generateBtn.disabled = true;
-      try {
-        const res = await fetch('/api/generate-questions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ jobDescription: trimmed })
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          errorEl.textContent = data.error || 'Request failed.';
-          return;
-        }
-        // Show retrieved relevant experience
-        const expDiv = document.getElementById('retrieved-experience');
-        const expList = document.getElementById('experience-list');
-        if (data.relevantExperiences && data.relevantExperiences.length) {
-          expList.innerHTML = data.relevantExperiences.map((exp, i) =>
-            `<div style="margin: 10px 0;">
-              <strong>${i + 1}. ${escapeHtml(exp.role)} at ${escapeHtml(exp.company)}</strong>
-              <span style="color: #0369a1; margin-left: 10px;">${(exp.score * 100).toFixed(1)}% match</span>
-            </div>`
-          ).join('');
-          expDiv.style.display = 'block';
-        } else {
-          expDiv.style.display = 'none';
-          expList.innerHTML = '';
-        }
-        // Display questions
-        if (data.questions && data.questions.length) {
-          questionsEl.innerHTML = '<strong>Questions:</strong><ol>' +
-            data.questions.map(q => '<li>' + escapeHtml(q) + '</li>').join('') + '</ol>';
-        } else {
-          questionsEl.textContent = 'No questions returned.';
-        }
-      } catch (e) {
-        errorEl.textContent = e.message || 'Network error.';
-      } finally {
-        generateBtn.disabled = false;
-      }
-    });
+Example:
+Staff Product Manager, AI Products
+- 7+ years PM experience
+- Shipped AI/ML products at scale
+- Experience with LLMs and RAG architecture
+- Led cross-functional teams"
+            ></textarea>
 
-    function escapeHtml(s) {
-      const div = document.createElement('div');
-      div.textContent = s;
-      return div.innerHTML;
-    }
-  </script>
+            <div class="button-group">
+                <button class="btn-primary" onclick="generateQuestions()">
+                    ✨ Generate Personalized Questions
+                </button>
+                <button class="btn-secondary" onclick="clearForm()">
+                    🔄 Clear
+                </button>
+            </div>
+        </div>
+
+        <div class="card loading" id="loading">
+            <div class="spinner"></div>
+            <div class="loading-text">
+                🔍 Searching your background...<br>
+                ⚡ Generating personalized questions...
+            </div>
+        </div>
+
+        <div class="card retrieved-experience" id="retrieved-experience">
+            <div class="exp-header">
+                📚 Retrieved Relevant Experience
+                <span class="overall-match" id="overall-match"></span>
+            </div>
+            <div id="experience-list"></div>
+        </div>
+
+        <div class="card questions-container" id="questions-container">
+            <div class="questions-header">
+                <div class="questions-title">💡 Your Personalized Interview Questions</div>
+                <button class="copy-btn" onclick="copyQuestions()">
+                    📋 Copy Questions
+                </button>
+            </div>
+            <div class="questions-list" id="questions-list"></div>
+        </div>
+
+        <div class="card" id="empty-state">
+            <div class="empty-state">
+                <div class="empty-icon">🚀</div>
+                <h3 style="margin-bottom: 8px; color: #1f2937;">Ready to Prepare?</h3>
+                <p>Paste a job description above to get personalized interview questions<br>based on your actual experience.</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        Built by Rashmi Nayak | 
+        <a href="https://github.com/rashrn/interview-prep-ai" target="_blank">View on GitHub</a>
+    </footer>
+
+    <script>
+        async function generateQuestions() {
+            const jobDescription = document.getElementById('job-description').value.trim();
+            
+            if (!jobDescription) {
+                alert('Please paste a job description first!');
+                return;
+            }
+
+            // Show loading, hide everything else
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('empty-state').style.display = 'none';
+            document.getElementById('retrieved-experience').classList.remove('active');
+            document.getElementById('questions-container').classList.remove('active');
+
+            try {
+                const response = await fetch('/api/generate-questions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ jobDescription })
+                });
+
+                const data = await response.json();
+
+                // Hide loading
+                document.getElementById('loading').classList.remove('active');
+
+                // Show retrieved experiences
+                if (data.relevantExperiences && data.relevantExperiences.length > 0) {
+                    const expList = document.getElementById('experience-list');
+                    expList.innerHTML = data.relevantExperiences.map((exp, i) => `
+                        <div class="exp-item">
+                            <div class="exp-role">
+                                ${i + 1}. ${exp.role} at ${exp.company}
+                                <span class="exp-score">${(exp.score * 100).toFixed(1)}% match</span>
+                            </div>
+                        </div>
+                    `).join('');
+                    const overallEl = document.getElementById('overall-match');
+                    if (overallEl) {
+                        const pct = typeof data.overallMatch === 'number'
+                            ? data.overallMatch * 100
+                            : (data.relevantExperiences.reduce((s, e) => s + (e.score || 0), 0) / data.relevantExperiences.length) * 100;
+                        overallEl.textContent = `Overall match: ${pct.toFixed(1)}%`;
+                        overallEl.style.display = 'inline-block';
+                    }
+                    document.getElementById('retrieved-experience').classList.add('active');
+                } else {
+                    document.getElementById('overall-match').textContent = '';
+                    document.getElementById('overall-match').style.display = 'none';
+                }
+
+                // Show questions
+                const questionsList = document.getElementById('questions-list');
+                questionsList.innerHTML = formatQuestions(data.questions);
+                document.getElementById('questions-container').classList.add('active');
+
+            } catch (error) {
+                document.getElementById('loading').classList.remove('active');
+                alert('Error generating questions. Please try again.');
+                console.error('Error:', error);
+            }
+        }
+
+        function escapeHtml(s) {
+            const div = document.createElement('div');
+            div.textContent = s;
+            return div.innerHTML;
+        }
+
+        function simpleMarkdown(text) {
+            if (!text || typeof text !== 'string') return '';
+            let out = escapeHtml(text);
+            // Bold **...**
+            out = out.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            // Italic *...* (after ** is replaced, so no conflict)
+            out = out.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
+            // Line breaks before STAR method cues so long questions are readable
+            out = out.replace(/\s+(Situation|Task|Action|Actions|Result|Results)(\s+that|\s+you|\s+your|\s+the|\s+in|\s*[,.])/gi, '<br/><strong>$1</strong>$2');
+            // Headings # and ## (only at start of string to avoid treating # in middle as heading)
+            out = out.replace(/^### (.+)$/gm, '<h4>$1</h4>');
+            out = out.replace(/^## (.+)$/gm, '<h4>$1</h4>');
+            out = out.replace(/^# (.+)$/gm, '<h3>$1</h3>');
+            // Horizontal rule ---
+            out = out.replace(/^---\s*$/gm, '<hr/>');
+            // Paragraphs: double newline
+            out = out.replace(/\n\n+/g, '</p><p>');
+            out = out.replace(/\n/g, '<br/>');
+            return '<p>' + out + '</p>';
+        }
+
+        function formatQuestions(questions) {
+            if (questions == null) return '<p>No questions returned.</p>';
+            if (Array.isArray(questions)) {
+                if (questions.length === 0) return '<p>No questions returned.</p>';
+                return '<ol>' + questions.map(q => '<li>' + simpleMarkdown(q) + '</li>').join('') + '</ol>';
+            }
+            const str = String(questions);
+            if (str.includes('\n1.') || (str.includes('1.') && str.includes('\n'))) {
+                const items = str.split(/\d+\./).slice(1).map(q => q.trim()).filter(Boolean);
+                return items.length ? '<ol>' + items.map(q => '<li>' + simpleMarkdown(q) + '</li>').join('') + '</ol>' : simpleMarkdown(str);
+            }
+            return simpleMarkdown(str);
+        }
+
+        function copyQuestions() {
+            const questions = document.getElementById('questions-list').innerText;
+            navigator.clipboard.writeText(questions).then(() => {
+                const btn = event.target;
+                const originalText = btn.innerText;
+                btn.innerText = '✅ Copied!';
+                btn.style.background = '#059669';
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.style.background = '#10b981';
+                }, 2000);
+            });
+        }
+
+        function clearForm() {
+            document.getElementById('job-description').value = '';
+            document.getElementById('empty-state').style.display = 'block';
+            document.getElementById('retrieved-experience').classList.remove('active');
+            document.getElementById('overall-match').textContent = '';
+            document.getElementById('questions-container').classList.remove('active');
+            document.getElementById('loading').classList.remove('active');
+        }
+    </script>
 </body>
 </html>
