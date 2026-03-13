@@ -119,49 +119,52 @@ Open [http://localhost:3000](http://localhost:3000). Paste a job description and
 
 ## Screenshots from the app
 
-Screenshots below are in order: **header** → **job description input** → **Generate** → **input detail**.  
-Images live in `docs/screenshots/` so they render on GitHub once committed.
+Flow: **input** → **role from JD** → **retrieved experience** → **personalized questions** (by section).
 
 ---
 
-**1. Header and branding**
+**1. Paste job description & generate**
 
-<p align="center">
-  <img src="docs/screenshots/01-header.png" width="700" alt="AI Interview Coach header – RAG-Powered, Built with Claude + Pinecone + OpenAI" />
-</p>
-<p align="center"><em>AI Interview Coach – header and tech badge.</em></p>
+<img src="docs/screenshots/01-generate-questions.png" width="700" alt="Paste job description and Generate Personalized Questions" />
 
-**2. Job description input (start)**
+*Paste a job description and click Generate Personalized Questions.*
 
-<p align="center">
-  <img src="docs/screenshots/02-input-start.png" width="700" alt="Paste Job Description label and start of sample JD" />
-</p>
-<p align="center"><em>Paste Job Description – label and start of the job description.</em></p>
+---
 
-**3. Job description (middle)**
+**2. Role from job description**
 
-<p align="center">
-  <img src="docs/screenshots/03-input-middle.png" width="700" alt="Middle of job description text" />
-</p>
-<p align="center"><em>Sample job description – product strategy and lifecycle.</em></p>
+<img src="docs/screenshots/02-role-description.png" width="700" alt="Extracted job title and company" />
 
-**4. Generate Personalized Questions button**
+*Job title and company extracted from the JD.*
 
-<p align="center">
-  <img src="docs/screenshots/04-generate-button.png" width="700" alt="Generate Personalized Questions button" />
-</p>
-<p align="center"><em>Main action – Generate Personalized Questions.</em></p>
+---
 
-**5. Job description (end) and Clear**
+**3. Retrieved relevant experience**
 
-<p align="center">
-  <img src="docs/screenshots/05-input-end-clear.png" width="700" alt="End of job description and Clear button" />
-</p>
-<p align="center"><em>End of job description and Clear button.</em></p>
+<img src="docs/screenshots/03-relevant-experience.png" width="700" alt="Retrieved experience with overall match %" />
 
-**6. Job description detail (excerpt)**
+*Relevant experience from your background with per-role match and overall match %.*
 
-<p align="center">
-  <img src="docs/screenshots/06-input-detail.png" width="700" alt="Job description excerpt with key phrases" />
-</p>
-<p align="center"><em>Excerpt from the job description used for personalization.</em></p>
+---
+
+**4. Recruiter screen & technical questions**
+
+<img src="docs/screenshots/04-rec-tech-questions.png" width="700" alt="Recruiter Screen and Technical Expertise sections" />
+
+*Recruiter Screen and Technical Expertise and Innovation sections.*
+
+---
+
+**5. Cross-functional & strategy questions**
+
+<img src="docs/screenshots/05-crossref-strategy.png" width="700" alt="Cross-Functional and Strategic Thinking sections" />
+
+*Cross-Functional Collaboration and Strategic Thinking and Problem Solving.*
+
+---
+
+**6. User-centered design questions**
+
+<img src="docs/screenshots/06-user-centric.png" width="700" alt="User-Centered Design and Customer Advocacy section" />
+
+*User-Centered Design and Customer Advocacy section.*
