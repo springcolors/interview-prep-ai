@@ -1,3 +1,11 @@
+**🌐 Live Demo:** [interview-coach.springcolors.dev](https://interview-coach.springcolors.dev)
+
+RAG-powered personalized interview preparation tool.
+Built in 4 days as part of my 30-day AI building challenge.
+
+**By:** [Rashmi Nayak](https://springcolors.dev) | springcolors 🌸
+```
+
 # Interview Prep AI
 
 RAG-powered web app that generates **personalized behavioral interview questions** for product management roles using your resume and a job description.
@@ -10,33 +18,6 @@ RAG-powered web app that generates **personalized behavioral interview questions
 - **RAG retrieval** → Your resume (embedded in Pinecone) is searched for the most relevant experience; results are **deduplicated by role/company** with an **aggregated match %** per experience.
 - **Overall match** → A single **profile match percentage** (aligned with holistic “fit” scores from other tools) is shown.
 - **5 tailored questions** → Claude generates **behavioral (STAR-style) questions** that tie the job requirements to your actual achievements.
-
----
-
-## Screenshots
-
-Place app screenshots in `docs/screenshots/` and reference them below. Use consistent width for a clean readme.
-
-| Screen | Description |
-|--------|-------------|
-| **Empty state** | Paste job description prompt and Generate button |
-| **Results** | Role/company card, retrieved experience with overall match %, and personalized questions |
-
-Example format (add your image files and uncomment):
-
-<!--
-<p align="center">
-  <img src="docs/screenshots/01-empty-state.png" width="600" alt="Empty state – paste job description" />
-</p>
-<p align="center"><em>Paste a job description to get started.</em></p>
-
-<p align="center">
-  <img src="docs/screenshots/02-results.png" width="600" alt="Results – role, experience match, questions" />
-</p>
-<p align="center"><em>Role from JD, retrieved experience with overall match %, and 5 personalized questions.</em></p>
--->
-
-_To add screenshots: create a `docs/screenshots/` folder, add PNG/JPG files (e.g. `01-empty-state.png`, `02-results.png`), then uncomment the HTML blocks above and adjust filenames._
 
 ---
 
@@ -138,22 +119,48 @@ Open [http://localhost:3000](http://localhost:3000). Paste a job description and
 
 ## Screenshots from the app
 
-<p align="center">
-  <img width="700" alt="App screenshot 1" src="https://github.com/user-attachments/assets/0292358b-f76e-4ffe-90bd-73053f8cc9b9" />
-</p>
-<p align="center"><em>Interview Prep AI – main view</em></p>
+Screenshots below are in order: **header** → **job description input** → **Generate** → **input detail**.
+
+---
+
+**1. Header and branding**
 
 <p align="center">
-  <img width="700" alt="App screenshot 2" src="https://github.com/user-attachments/assets/e0a15d6b-1bb0-42ea-b741-4312eee814b1" />
+  <img src="assets/Screenshot_2026-03-11_at_11.55.27_AM-699b8545-d2bf-4358-97b3-8f30a101d75a.png" width="700" alt="AI Interview Coach header – RAG-Powered, Built with Claude + Pinecone + OpenAI" />
 </p>
-<p align="center"><em>Job description input and results</em></p>
+<p align="center"><em>AI Interview Coach – header and tech badge.</em></p>
+
+**2. Job description input (start)**
 
 <p align="center">
-  <img width="700" alt="App screenshot 3" src="https://github.com/user-attachments/assets/37e6cd56-84c2-4d54-b158-a2f62fecd905" />
+  <img src="assets/Screenshot_2026-03-11_at_11.55.34_AM-3d8769a5-7fa1-4240-86f4-7bce0be8ea69.png" width="700" alt="Paste Job Description label and start of sample JD" />
 </p>
-<p align="center"><em>Retrieved experience and questions</em></p>
+<p align="center"><em>Paste Job Description – label and start of the job description.</em></p>
+
+**3. Job description (middle)**
 
 <p align="center">
-  <img width="700" alt="App screenshot 4" src="https://github.com/user-attachments/assets/732f03bd-fcb7-4a6e-b09b-ef504ddbaca5" />
+  <img src="assets/Screenshot_2026-03-11_at_11.56.00_AM-151d15d2-badd-4860-b513-c1371637bb80.png" width="700" alt="Middle of job description text" />
 </p>
-<p align="center"><em>Role and match details</em></p>
+<p align="center"><em>Sample job description – product strategy and lifecycle.</em></p>
+
+**4. Generate Personalized Questions button**
+
+<p align="center">
+  <img src="assets/Screenshot_2026-03-11_at_11.55.48_AM-f31da525-ef00-41de-bcf4-ad55fa47a32e.png" width="700" alt="Generate Personalized Questions button" />
+</p>
+<p align="center"><em>Main action – Generate Personalized Questions.</em></p>
+
+**5. Job description (end) and Clear**
+
+<p align="center">
+  <img src="assets/Screenshot_2026-03-11_at_11.56.09_AM-240675e1-8db2-4556-8ec8-0e9e6a488f15.png" width="700" alt="End of job description and Clear button" />
+</p>
+<p align="center"><em>End of job description and Clear button.</em></p>
+
+**6. Job description detail (excerpt)**
+
+<p align="center">
+  <img src="assets/Screenshot_2026-03-11_at_11.55.15_AM-0bf436b2-d9de-482a-b06c-0af7dfbc6b3f.png" width="700" alt="Job description excerpt with key phrases" />
+</p>
+<p align="center"><em>Excerpt from the job description used for personalization.</em></p>
