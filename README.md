@@ -119,48 +119,49 @@ Open [http://localhost:3000](http://localhost:3000). Paste a job description and
 
 ## Screenshots from the app
 
-Screenshots below are in order: **header** → **job description input** → **Generate** → **input detail**.
+Screenshots below are in order: **header** → **job description input** → **Generate** → **input detail**.  
+Images live in `docs/screenshots/` so they render on GitHub once committed.
 
 ---
 
 **1. Header and branding**
 
 <p align="center">
-  <img src="assets/Screenshot_2026-03-11_at_11.55.27_AM-699b8545-d2bf-4358-97b3-8f30a101d75a.png" width="700" alt="AI Interview Coach header – RAG-Powered, Built with Claude + Pinecone + OpenAI" />
+  <img src="docs/screenshots/01-header.png" width="700" alt="AI Interview Coach header – RAG-Powered, Built with Claude + Pinecone + OpenAI" />
 </p>
 <p align="center"><em>AI Interview Coach – header and tech badge.</em></p>
 
 **2. Job description input (start)**
 
 <p align="center">
-  <img src="assets/Screenshot_2026-03-11_at_11.55.34_AM-3d8769a5-7fa1-4240-86f4-7bce0be8ea69.png" width="700" alt="Paste Job Description label and start of sample JD" />
+  <img src="docs/screenshots/02-input-start.png" width="700" alt="Paste Job Description label and start of sample JD" />
 </p>
 <p align="center"><em>Paste Job Description – label and start of the job description.</em></p>
 
 **3. Job description (middle)**
 
 <p align="center">
-  <img src="assets/Screenshot_2026-03-11_at_11.56.00_AM-151d15d2-badd-4860-b513-c1371637bb80.png" width="700" alt="Middle of job description text" />
+  <img src="docs/screenshots/03-input-middle.png" width="700" alt="Middle of job description text" />
 </p>
 <p align="center"><em>Sample job description – product strategy and lifecycle.</em></p>
 
 **4. Generate Personalized Questions button**
 
 <p align="center">
-  <img src="assets/Screenshot_2026-03-11_at_11.55.48_AM-f31da525-ef00-41de-bcf4-ad55fa47a32e.png" width="700" alt="Generate Personalized Questions button" />
+  <img src="docs/screenshots/04-generate-button.png" width="700" alt="Generate Personalized Questions button" />
 </p>
 <p align="center"><em>Main action – Generate Personalized Questions.</em></p>
 
 **5. Job description (end) and Clear**
 
 <p align="center">
-  <img src="assets/Screenshot_2026-03-11_at_11.56.09_AM-240675e1-8db2-4556-8ec8-0e9e6a488f15.png" width="700" alt="End of job description and Clear button" />
+  <img src="docs/screenshots/05-input-end-clear.png" width="700" alt="End of job description and Clear button" />
 </p>
 <p align="center"><em>End of job description and Clear button.</em></p>
 
 **6. Job description detail (excerpt)**
 
 <p align="center">
-  <img src="assets/Screenshot_2026-03-11_at_11.55.15_AM-0bf436b2-d9de-482a-b06c-0af7dfbc6b3f.png" width="700" alt="Job description excerpt with key phrases" />
+  <img src="docs/screenshots/06-input-detail.png" width="700" alt="Job description excerpt with key phrases" />
 </p>
 <p align="center"><em>Excerpt from the job description used for personalization.</em></p>
